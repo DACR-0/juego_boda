@@ -1,6 +1,9 @@
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
+import pygame  # Librería para reproducir música
 
+# Lógica para el juego principal
 class DragDropGame:
     def __init__(self, root):
         self.root = root
@@ -86,7 +89,7 @@ class DragDropGame:
                 self.estado_puestos[(x0, y0)] = None  # Inicialmente el puesto está vacío
 
     def dibujar_zona_invitados2(self, x, y, filas, columnas, tamaño, separación, pasillo_columna):
-    # Dibujar solo los puestos, sin el rectángulo de contenedor
+        # Dibujar solo los puestos, sin el rectángulo de contenedor
         for i in range(filas):
             for j in range(columnas):
                 if j == pasillo_columna:  # Crear un pasillo entre la columna específica
@@ -145,7 +148,60 @@ class DragDropGame:
         orig_x, orig_y = self.origen_nombres[widget]
         widget.place(x=orig_x, y=orig_y)
 
-# Crear la ventana principal
+
+# Menú principal con música
+class MainMenu:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Menú Principal")
+        self.root.attributes('-fullscreen', True)  # Modo pantalla completa
+
+        # Configurar música
+        pygame.mixer.init()
+        pygame.mixer.music.load("musica.mp3")  # Cambia "musica.mp3" por el nombre de tu archivo de audio
+        pygame.mixer.music.play(-1)  # Reproducir en bucle
+
+        # Fondo de pantalla
+        self.bg_image = Image.open("menu_fondo.jpg")  # Cambia "menu_fondo.jpg" por el nombre de tu imagen
+        self.bg_image = self.bg_image.resize((self.root.winfo_screenwidth(), self.root.winfo_screenheight()))
+        self.bg_image_tk = ImageTk.PhotoImage(self.bg_image)
+
+        self.canvas = tk.Canvas(self.root, width=self.root.winfo_screenwidth(), height=self.root.winfo_screenheight())
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.canvas.create_image(0, 0, image=self.bg_image_tk, anchor=tk.NW)
+
+        # Botón de inicio con estilo mejorado
+        start_button = ttk.Button(self.root, text="Start", command=self.start_game, style="Start.TButton")
+        start_button.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
+
+        # Estilo del botón
+        self.style = ttk.Style()
+        self.style.configure("Start.TButton",
+                             font=("Arial", 18, "italic", "bold"),  # Fuente cursiva
+                             padding=20,  # Espaciado interno para hacer el botón más grande
+                             background="#ADD8E6",  # Fondo azul claro
+                             foreground="#000fff",  # Texto en blanco
+                             borderwidth=3,  # Borde del botón
+                             relief="solid",  # Estilo de borde sólido
+                             focuscolor="#ADD8E6",  # Color de enfoque del botón
+                             highlightthickness=2,  # Grosor del borde al hacer foco
+                             highlightbackground="black",  # Color de borde cuando el botón tiene foco
+                             highlightcolor="black")  # Color de borde cuando se presiona
+
+    def start_game(self):
+        pygame.mixer.music.stop()  # Detener la música del menú
+        self.root.destroy()  # Cerrar la ventana del menú
+        launch_game()  # Lanzar el juego principal
+
+
+
+# Función para lanzar el juego
+def launch_game():
+    root = tk.Tk()
+    app = DragDropGame(root)
+    root.mainloop()
+
+# Crear la ventana del menú principal
 root = tk.Tk()
-app = DragDropGame(root)
+menu = MainMenu(root)
 root.mainloop()
